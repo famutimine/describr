@@ -8,6 +8,7 @@ class FindOutliers:
         self.id_col = id_col
         self.group_col = group_col
         self.outlier_flag_col = 'outlier_flag'
+        self.outlierdf=None
     
     def flag_outliers(self):
         def flag_outliers(row):
@@ -28,18 +29,20 @@ class FindOutliers:
             return outliers.any()
         
         self.df[self.outlier_flag_col] = self.df.apply(flag_outliers, axis=1).astype(int)
+        self.outlierdf=self.df.copy()
+        self.df.drop(columns=self.outlier_flag_col, inplace=True)
     
     def count_outliers(self):
-        if self.outlier_flag_col not in self.df.columns:
+        if self.outlier_flag_col not in self.outlierdf.columns:
             raise KeyError(f"Column not found: {self.outlier_flag_col}")
         
-        outlier_counts = self.df.groupby(self.group_col)[self.outlier_flag_col].sum()
+        outlier_counts = self.outlierdf.groupby(self.group_col)[self.outlier_flag_col].sum()
         print("Outlier Counts:")
         for group, count in outlier_counts.items():
             print(f"Group: {self.group_col} = {group}, Outlier Count: {count}")
     
     def remove_outliers(self):
-        cleaned_df = self.df[self.df[self.outlier_flag_col] == 0].copy()
+        cleaned_df = self.outlierdf[self.outlierdf[self.outlier_flag_col] == 0].copy()
         cleaned_df.drop(columns=self.outlier_flag_col, inplace=True)
         return cleaned_df
 
