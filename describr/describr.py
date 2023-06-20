@@ -173,7 +173,7 @@ class DescriptiveStats:
 
     def _compute_continuous_stats_with_median(self, continuous_vars):
         continuous_vars.append(self.group_col)
-        continuous_median = df[continuous_vars].groupby(self.group_col).agg(['median', lambda x: x.quantile(0.25), lambda x: x.quantile(0.75)])
+        continuous_median = self.df[continuous_vars].groupby(self.group_col).agg(['median', lambda x: x.quantile(0.25), lambda x: x.quantile(0.75)])
         treatment_values = self.df[self.group_col].unique()
         continuous_median = continuous_median.T
         continuous_median.reset_index(inplace=True)
