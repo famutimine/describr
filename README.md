@@ -46,44 +46,55 @@ df = pd.DataFrame(data)
 ```
 ## Parameters
 **df**: name of dataframe
+
 **id_col**: Primary key of the dataframe; accepts string or integer or float.
+
 **group_col**: A Column to group by, It must be a binary column. Strings or integers are acceptable. 
+
 **positive_class**: This is the response value for the primary outcome of interest. For instance, positive value for a Treatment cohort is 'Yes' or 1 otherwise 'No' or 0, respectively. Strings or integers are acceptable.
+
 **continuous_var_summary**: Users specifies measures of central tendency, only mean and median are acceptable. This parameter is case insensitive.
 
 
 ## Example usage of FindOutliers
 
-### This returns a dataframe (outliers_flag_df) with outlier_flag column (outlier_flag =1: record contains one or more ouliers). Tukey's IQR method is used to detect outliers in the data
+This returns a dataframe (outliers_flag_df) with outlier_flag column (outlier_flag =1: record contains one or more ouliers). Tukey's IQR method is used to detect outliers in the data
 
 ```python
 outliers_flag=FindOutliers(df=df, id_col='MCID', group_col='TREATMENT')
 outliers_flag_df=outliers_flag.flag_outliers()
 ```
-### This example counts number of rows with outliers stratified by a defined grouping variable
+## This example counts number of rows with outliers stratified by a defined grouping variable
 ```python
 outliers_flag.count_outliers()
 ```
-### This example removes all outliers
+## This example removes all outliers
 ```python
 df2=outliers_flag.remove_outliers()
 df2.shape
 ```
 
-### Example usage of DescriptiveStats
+## Example usage of DescriptiveStats
 ```python descriptive_stats = DescriptiveStats(df=df, id_col='MCID', group_col='TREATMENT', positive_class='Yes', continuous_var_summary='median')
 ```
-### Get statistics for binary and categorical variables and returns a dataframe.
+## Get statistics for binary and categorical variables and returns a dataframe.
 ```python
 binary_stats_df = descriptive_stats.get_binary_stats()
 ```
+
+## Get mean and standard deviation for continuous variables and returns a dataframe.
+
 ```python
-### Get mean and standard deviation for continuous variables and returns a dataframe.
 continuous_stats_mean_df = descriptive_stats.get_continuous_mean_stats()
+```
 
-### Get median and interquartile range for continuous variables and returns a dataframe.
+## Get median and interquartile range for continuous variables and returns a dataframe.
+```python
 continuous_stats_median_df = descriptive_stats.get_continuous_median_stats()
+```
 
-### Compute summary statistics for binary and continuous variables based on defined measure of central tendency. Method returns a dataframe.
+## Compute summary statistics for binary and continuous variables based on defined measure of central tendency. Method returns a dataframe.
+````python
 descriptive_stats.compute_descriptive_stats()
 summary_stats = descriptive_stats.summary_stats()
+````
