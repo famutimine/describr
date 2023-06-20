@@ -78,23 +78,23 @@ df2.shape
 ```python 
 descriptive_stats = DescriptiveStats(df=df, id_col='MCID', group_col='TREATMENT', positive_class='Yes', continuous_var_summary='median')
 ```
-#### Get statistics for binary and categorical variables and returns a dataframe.
+#### Gets statistics for binary and categorical variables and returns a dataframe.
 ```python
 binary_stats_df = descriptive_stats.get_binary_stats()
 ```
 
-#### Get mean and standard deviation for continuous variables and returns a dataframe.
+#### Gets mean and standard deviation for continuous variables and returns a dataframe.
 
 ```python
 continuous_stats_mean_df = descriptive_stats.get_continuous_mean_stats()
 ```
 
-#### Get median and interquartile range for continuous variables and returns a dataframe.
+#### Gets median and interquartile range for continuous variables and returns a dataframe.
 ```python
 continuous_stats_median_df = descriptive_stats.get_continuous_median_stats()
 ```
 
-#### Compute summary statistics for binary and continuous variables based on defined measure of central tendency. Method returns a dataframe.
+#### Computes summary statistics for binary and continuous variables based on defined measure of central tendency. Method returns a dataframe.
 ````python
 descriptive_stats.compute_descriptive_stats()
 summary_stats = descriptive_stats.summary_stats()
