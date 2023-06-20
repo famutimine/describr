@@ -1,14 +1,15 @@
 import setuptools
 from setuptools import setup, find_packages
 import os
-import requests
 
-response = requests.get("https://github.com/famutimine/describr/blob/main/README.md")
-long_description = response.text
+from urllib.request import urlopen
+
+with urlopen("https://raw.githubusercontent.com/famutimine/describr/main/README.md") as fh:
+    long_description = fh.read().decode()
 
 setuptools.setup(
     name='describr',
-    version='0.0.1',
+    version='0.0.2',
     description='Describr is a Python library that provides a convenient way to generate descriptive statistics for datasets.',
     long_description=long_description,
     long_description_content_type='text/markdown',
