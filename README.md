@@ -1,21 +1,23 @@
-# describr
+## README.md
 
 describr is a Python library that provides functionality for descriptive statistics and outlier detection in pandas DataFrames.
 
-## Installation
+**Installation**
 
 You can install describr using pip:
 
 ```python
 pip install describr
-
+```
 
 ### Example usage
+```python
 import pandas as pd
 import numpy as np
 from describr import FindOutliers, DescriptiveStats
-
-# Create a DataFrame with your data
+```
+### Create a DataFrame with your data
+```python
 np.random.seed(0)
 n = 500
 
@@ -41,36 +43,41 @@ data = {
 }
 
 df = pd.DataFrame(data)
-
-# Parameters
-df: name of dataframe
-id_col: Primary key of the dataframe; accepts string or integer or float.
-group_col: A Column to group by, It must be a binary column. Strings or integers are acceptable. 
-positive_class: This is the response value for the primary outcome of interest. For instance, positive value for a Treatment cohort is 'Yes' or 1 otherwise 'No' or 0, respectively. Strings or integers are acceptable.
-continuous_var_summary: Users specifies measures of central tendency, only mean and median are acceptable. This parameter is case insensitive.
+```
+## Parameters
+**df**: name of dataframe
+**id_col**: Primary key of the dataframe; accepts string or integer or float.
+**group_col**: A Column to group by, It must be a binary column. Strings or integers are acceptable. 
+**positive_class**: This is the response value for the primary outcome of interest. For instance, positive value for a Treatment cohort is 'Yes' or 1 otherwise 'No' or 0, respectively. Strings or integers are acceptable.
+**continuous_var_summary**: Users specifies measures of central tendency, only mean and median are acceptable. This parameter is case insensitive.
 
 
 ## Example usage of FindOutliers
 
 ### This returns a dataframe (outliers_flag_df) with outlier_flag column (outlier_flag =1: record contains one or more ouliers). Tukey's IQR method is used to detect outliers in the data
 
+```python
 outliers_flag=FindOutliers(df=df, id_col='MCID', group_col='TREATMENT')
 outliers_flag_df=outliers_flag.flag_outliers()
-
+```
 ### This example counts number of rows with outliers stratified by a defined grouping variable
+```python
 outliers_flag.count_outliers()
-
+```
 ### This example removes all outliers
+```python
 df2=outliers_flag.remove_outliers()
 df2.shape
-
+```
 
 ### Example usage of DescriptiveStats
-descriptive_stats = DescriptiveStats(df=df, id_col='MCID', group_col='TREATMENT', positive_class='Yes', continuous_var_summary='median')
-
+```python descriptive_stats = DescriptiveStats(df=df, id_col='MCID', group_col='TREATMENT', positive_class='Yes', continuous_var_summary='median')
+```
 ### Get statistics for binary and categorical variables and returns a dataframe.
+```python
 binary_stats_df = descriptive_stats.get_binary_stats()
-
+```
+```python
 ### Get mean and standard deviation for continuous variables and returns a dataframe.
 continuous_stats_mean_df = descriptive_stats.get_continuous_mean_stats()
 
