@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 from describr import FindOutliers, DescriptiveStats
 ```
-#### Create a DataFrame with your data
+#### Create a sample dataframe
 ```python
 np.random.seed(0)
 n = 500
