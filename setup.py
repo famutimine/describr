@@ -1,11 +1,10 @@
 import setuptools
 from setuptools import setup, find_packages
 import os
+import requests
 
-from urllib.request import urlopen
-
-with urlopen("https://github.com/famutimine/describr/blob/main/README.md") as fh:
-    long_description = fh.read().decode()
+response = requests.get("https://github.com/famutimine/describr/blob/main/README.md")
+long_description = response.text
 
 setuptools.setup(
     name='describr',
@@ -32,11 +31,12 @@ setuptools.setup(
         'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Scientific/Engineering :: Information Analysis',
     ],
-    keywords='pdc calculator medication adherence',
+    keywords='descriptive statistics',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
         'numpy',
         'pandas',
+	'scipy',
     ],
 )
