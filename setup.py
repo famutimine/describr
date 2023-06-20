@@ -8,7 +8,7 @@ with urlopen("https://github.com/famutimine/describr/main/README.md") as fh:
     long_description = fh.read().decode()
 
 setuptools.setup(
-    name='pdcscore',
+    name='describr',
     version='0.0.1',
     description='Describr is a Python library that provides a convenient way to generate descriptive statistics for datasets.',
     long_description=long_description,
