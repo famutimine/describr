@@ -4,7 +4,7 @@ import os
 
 from urllib.request import urlopen
 
-with urlopen("https://github.com/famutimine/describr/main/README.md") as fh:
+with urlopen("https://github.com/famutimine/describr/blob/main/README.md") as fh:
     long_description = fh.read().decode()
 
 setuptools.setup(
