@@ -6,7 +6,7 @@ describr is a Python library that provides functionality for descriptive statist
 
 You can install describr using pip:
 
-```shell
+```python
 pip install describr
 
 
