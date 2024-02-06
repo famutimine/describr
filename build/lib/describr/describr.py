@@ -52,8 +52,8 @@ class DescriptiveStats:
         self.df = df
         self.id_col = id_col
         self.group_col = group_col
-        self.positive_class=positive_class
-        self.continuous_var_summary=continuous_var_summary
+        self.positive_class = str(positive_class)
+        self.continuous_var_summary = continuous_var_summary
         self.binary_stats_df = None
         self.continuous_stats_mean_df = None
         self.continuous_stats_median_df = None        
@@ -62,19 +62,19 @@ class DescriptiveStats:
         binary_vars = []
         continuous_vars = []
 
-        self.df = self.df.set_index(self.id_col)
+        self.df = self.df.set_index(self.id_col)        
 
-        categorical_columns = self.df.select_dtypes(include=['object']).columns 
+        categorical_columns = self.df.select_dtypes(include=['object']).columns      
+        self.df[categorical_columns] = self.df[categorical_columns].fillna('Missing')  # Fill null values with 'Missing'
+        self.df[categorical_columns] = self.df[categorical_columns].replace('', 'Missing')  # Replace blank values with 'Missing'
         
-        self.df[categorical_columns] = self.df[categorical_columns].fillna('Missing')
-        
-        df_group_col=self.df[[self.group_col]]
+        df_group_col = self.df[[self.group_col]]
         
         self.df.drop(self.group_col, axis=1, inplace=True)
 
         self.df = pd.get_dummies(self.df, dtype='int64')
         
-        self.df[self.group_col]=df_group_col[self.group_col]
+        self.df[self.group_col] = df_group_col[self.group_col]
 
         for col in self.df.columns:
             if self.df[col].dtype in ['int64', 'int32'] and self.df[col].nunique() <= 2 and self.group_col not in col:
@@ -86,17 +86,21 @@ class DescriptiveStats:
 
     def _compute_binary_stats(self, binary_vars):
         treatment_values = self.df[self.group_col].unique()
+        treatment_values.sort()
         
         if not binary_vars:
-            return pd.DataFrame()        
-
+            return pd.DataFrame()
+        
         binary_stats = self.df.groupby(self.group_col)[binary_vars].agg(['size', 'mean'])
-
+        
         binary_p_values = {}
         for var in binary_vars:
             for val in treatment_values:
                 group_val = 'group_{}'.format(val)
-                _, p_value = stats.ttest_ind(self.df[self.df[self.group_col] == val][var], self.df[self.df[self.group_col] != val][var])
+                _, p_value = stats.ttest_ind(
+                    self.df[(self.df[self.group_col] == val) & (~self.df[var].isnull())][var],
+                    self.df[(self.df[self.group_col] != val) & (~self.df[var].isnull())][var]
+                )
                 binary_p_values[var] = p_value
 
         binary_stats_df = pd.DataFrame(binary_stats).T
@@ -104,36 +108,30 @@ class DescriptiveStats:
 
         binary_stats_df.reset_index(inplace=True)
         new_columns = {'level_0': 'variable', 'level_1': 'stats'}
-        binary_stats_df=binary_stats_df.rename(columns=new_columns)
+        binary_stats_df = binary_stats_df.rename(columns=new_columns)
         binary_stats_df = binary_stats_df.rename(columns={col: self.group_col + '_' + str(col) + '_Proportion' for col in binary_stats_df.columns[-2:]})
-        
 
         binary_stats_df_sample_mean = binary_stats_df[binary_stats_df['stats'] == 'mean']
         binary_stats_df_sample_size = binary_stats_df[binary_stats_df['stats'] == 'size']
 
-        binary_stats_df_sample_mean = binary_stats_df_sample_mean.copy() # Create a copy of the DataFrame
-        
+        binary_stats_df_sample_mean = binary_stats_df_sample_mean.copy()  # Create a copy of the DataFrame
+
         for col in binary_stats_df_sample_size.columns[-2:]:
             globals()['mapping_dict_' + col] = dict(zip(binary_stats_df_sample_size['variable'], binary_stats_df_sample_size[col]))
             binary_stats_df_sample_mean[col.rsplit('_', 1)[0] + '_n'] = binary_stats_df_sample_mean[col] * binary_stats_df_sample_mean['variable'].map(globals()['mapping_dict_' + col])
 
         binary_stats_df_sample_mean.drop('stats', axis=1, inplace=True)
-        
+
         binary_p_values_df.reset_index(inplace=True)
         binary_p_values_df.rename(columns={'index': 'variable'}, inplace=True)
 
         df_binary = binary_stats_df_sample_mean.merge(binary_p_values_df, on='variable')
-        
-        positive_class_columns = [col for col in df_binary.columns if self.positive_class in col]
-        column_order = [col for col in df_binary.columns if col not in positive_class_columns]
-        column_order.insert(1, positive_class_columns[0])
-        column_order.insert(2, positive_class_columns[1])
-        df_binary = df_binary[column_order]
 
         return df_binary
 
     def _compute_continuous_stats_with_mean(self, continuous_vars):
         treatment_values = self.df[self.group_col].unique()
+        treatment_values.sort()
         
         continuous_stats = self.df.groupby(self.group_col)[continuous_vars].agg(['mean', 'std'])
 
@@ -141,7 +139,10 @@ class DescriptiveStats:
         for var in continuous_vars:
             for val in treatment_values:
                 group_val = 'group_{}'.format(val)
-                _, p_value = stats.ttest_ind(self.df[self.df[self.group_col] == val][var], self.df[self.df[self.group_col] != val][var])
+                _, p_value = stats.ttest_ind(
+                    self.df[(self.df[self.group_col] == val) & (~self.df[var].isnull())][var],
+                    self.df[(self.df[self.group_col] != val) & (~self.df[var].isnull())][var]
+                )
                 continuous_p_values[var] = p_value
 
         continuous_stats_mean_df = pd.DataFrame(continuous_stats).T
@@ -149,9 +150,9 @@ class DescriptiveStats:
 
         continuous_stats_mean_df.reset_index(inplace=True)
         new_columns = {'level_0': 'variable', 'level_1': 'stats'}
-        continuous_stats_mean_df=continuous_stats_mean_df.rename(columns=new_columns)
+        continuous_stats_mean_df = continuous_stats_mean_df.rename(columns=new_columns)
         continuous_stats_mean_df = continuous_stats_mean_df.rename(columns={col: self.group_col + '_' + str(col) + '_mean' for col in continuous_stats_mean_df.columns[-2:]})
-        
+
         mean_df = continuous_stats_mean_df[continuous_stats_mean_df['stats'] == 'mean']
         std_df = continuous_stats_mean_df[continuous_stats_mean_df['stats'] == 'std']
 
@@ -166,18 +167,13 @@ class DescriptiveStats:
         continuous_p_values_df.rename(columns={'index': 'variable'}, inplace=True)
 
         df_continuous = mean_df.merge(continuous_p_values_df, on='variable')
-        positive_class_columns = [col for col in df_continuous.columns if self.positive_class in col]
-        column_order = [col for col in df_continuous.columns if col not in positive_class_columns]
-        column_order.insert(1, positive_class_columns[0])
-        column_order.insert(2, positive_class_columns[1])
-        df_continuous = df_continuous[column_order]
-
         return df_continuous
 
     def _compute_continuous_stats_with_median(self, continuous_vars):
         continuous_vars.append(self.group_col)
         continuous_median = self.df[continuous_vars].groupby(self.group_col).agg(['median', lambda x: x.quantile(0.25), lambda x: x.quantile(0.75)])
         treatment_values = self.df[self.group_col].unique()
+        treatment_values.sort()
         continuous_median = continuous_median.T
         continuous_median.reset_index(inplace=True)
         new_columns = {'level_0': 'variable', 'level_1': 'stats'}
@@ -198,13 +194,19 @@ class DescriptiveStats:
 
         median_df.drop('stats', axis=1, inplace=True)
 
-       
         continuous_p_values_median = {}
         continuous_vars.remove(self.group_col)
         for var in continuous_vars:
             for val in treatment_values:
                 group_val = 'group_{}'.format(val)
-                _, p_value = stats.ttest_ind(self.df[self.df[self.group_col] == val][var], self.df[self.df[self.group_col] != val][var])
+                # Check if continuous_var_summary is 'median', and set p-value to 'null' if true
+                if self.continuous_var_summary.lower() == 'median':
+                    p_value = 'null'
+                else:
+                    _, p_value = stats.ttest_ind(
+                        self.df[(self.df[self.group_col] == val) & (~self.df[var].isnull())][var],
+                        self.df[(self.df[self.group_col] != val) & (~self.df[var].isnull())][var]
+                    )
                 continuous_p_values_median[var] = p_value
 
         # Initialize an empty dataframe to store the continuous stats
@@ -216,17 +218,7 @@ class DescriptiveStats:
         continuous_p_values_median_df.rename(columns={'index': 'variable'}, inplace=True)
 
         df_continuous_median = continuous_stats_median_df.merge(continuous_p_values_median_df, on='variable')
-        positive_class_columns = [col for col in df_continuous_median.columns if self.positive_class in col]
-        
-        if len(positive_class_columns) > 1:
-            column_order = [col for col in df_continuous_median.columns if col not in positive_class_columns]
-            column_order.insert(1, positive_class_columns[0])
-            column_order.insert(2, positive_class_columns[1])
-            column_order.insert(3, positive_class_columns[2])
-            df_continuous_median = df_continuous_median[column_order]
-
         return df_continuous_median
-
 
 
     def compute_descriptive_stats(self):
@@ -277,7 +269,7 @@ class DescriptiveStats:
 
         # Drop columns
         columns_to_delete = [col for col in self.binary_stats_df.columns if col.endswith('_n')]
-        summary_stats_binary.drop(columns_to_delete, axis=1, inplace=True)
+        summary_stats_binary.drop(columns=columns_to_delete, axis=1, inplace=True)
 
         return summary_stats_binary
 
@@ -297,7 +289,7 @@ class DescriptiveStats:
 
         # Drop columns
         columns_to_delete = [col for col in self.continuous_stats_mean_df.columns if col.endswith('_std')]
-        summary_stats_continuous_mean.drop(columns_to_delete, axis=1, inplace=True)
+        summary_stats_continuous_mean.drop(columns=columns_to_delete, axis=1, inplace=True)
 
         return summary_stats_continuous_mean
         
@@ -318,19 +310,34 @@ class DescriptiveStats:
 
         # Drop columns
         columns_to_delete = [col for col in self.continuous_stats_median_df.columns if col.endswith('_Q1') or col.endswith('_Q3')]
-        summary_stats_continuous_median.drop(columns_to_delete, axis=1, inplace=True)
+        summary_stats_continuous_median.drop(columns=columns_to_delete, axis=1, inplace=True)
 
         return summary_stats_continuous_median
+    
+
+    def _order_columns_dynamically(self, df):
+        # Get the list of columns in the resulting dataframe
+        columns = list(df.columns)
+        # Determine the index of the first and last column
+        first_column_index = columns.index(columns[0])
+        last_column_index = columns.index(columns[-1])
+        # Exclude the first and last column
+        middle_columns = columns[first_column_index + 1:last_column_index]
+        # Order the remaining columns in descending order
+        middle_columns = sorted(middle_columns, reverse=True)
+        # Reorder columns while preserving the order of the first and last columns
+        column_order = [columns[0]] + middle_columns + [columns[-1]]
+        df = df[column_order]
+        return df
     
     def summary_stats(self):
         summary_stats_continuous_mean = self.format_continuous_mean_stats()
         summary_stats_binary = self.format_binary_stats()
         summary_stats_continuous_median = self.format_continuous_median_stats()
-
-        # Vertically concatenate the dataframes
-        stacked_df=[]
-        if self.continuous_var_summary.lower()=='mean':
+        if self.continuous_var_summary.lower() == 'mean':
             stacked_df = pd.concat([summary_stats_continuous_mean, summary_stats_binary], ignore_index=True)
         else:
             stacked_df = pd.concat([summary_stats_continuous_median, summary_stats_binary], ignore_index=True)
+        # Order columns dynamically
+        stacked_df = self._order_columns_dynamically(stacked_df)
         return stacked_df
