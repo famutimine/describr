@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats as stats
 
+# may remove this FindOutliers in future release as it is not efficient
 class FindOutliers:
     def __init__(self, df, id_col, group_col):
         self.df = df
