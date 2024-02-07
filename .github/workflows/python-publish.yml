@@ -20,6 +20,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: '0'  # Ensures you get all history for all branches and tags
+        token: ${{ secrets.GENERAL_ACCESS_TOKEN }}  # Allows pushing back to the repository
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -33,10 +34,16 @@ jobs:
 
     - name: Bump version and commit changes
       run: |
-        git config --global user.email "danielfamutimi@gmail.com"
-        git config --global user.name "famutimine"
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
         bump2version patch  # Or minor or major, depending on your strategy
-        git push --follow-tags  # Pushes the commit and tags back to the repository
+      env:
+        GITHUB_TOKEN: ${{ secrets.GENERAL_ACCESS_TOKEN }}
+
+    - name: Push changes
+      run: git push --follow-tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GENERAL_ACCESS_TOKEN }}
 
     - name: Build and publish
       env:
