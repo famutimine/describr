@@ -242,9 +242,9 @@ class DescriptiveStats:
         fraction = row[column_name]
         return '{:.0f} ({:.1%})'.format(sample_size, fraction)
     
-    def format_continuous_column(self, row, column_name):
-        mean = row[column_name.replace('_mean', '_std')]
-        std = row[column_name]
+    def format_continuous_column(self, row, column_name):        
+        mean = row[column_name]
+        std = row[column_name.replace('_mean', '_std')]
         return '{:.2f} ({:.2f})'.format(mean, std)
     
     def format_continuous_median_column(self, row, column_name):
