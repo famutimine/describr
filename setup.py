@@ -9,7 +9,7 @@ with urlopen("https://raw.githubusercontent.com/famutimine/describr/main/README.
 
 setuptools.setup(
     name='describr',
-    version='0.0.9',
+    version='0.0.24',
     description='Describr is a Python library that provides a convenient way to generate descriptive statistics for datasets.',
     long_description=long_description,
     long_description_content_type='text/markdown',
