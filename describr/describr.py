@@ -114,7 +114,6 @@ class DescriptiveStats:
 
         binary_stats_df_sample_mean = binary_stats_df[binary_stats_df['stats'] == 'mean']
         binary_stats_df_sample_size = binary_stats_df[binary_stats_df['stats'] == 'size']
-
         binary_stats_df_sample_mean = binary_stats_df_sample_mean.copy()  # Create a copy of the DataFrame
 
         for col in binary_stats_df_sample_size.columns[-2:]:
