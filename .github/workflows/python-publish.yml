@@ -19,8 +19,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        fetch-depth: '0' 
-        token: ${{ secrets.GENERAL_ACCESS_TOKEN }}
+        fetch-depth: '0'  # Ensures you get all history for all branches and tags
+        token: ${{ secrets.GENERAL_ACCESS_TOKEN }}  # Allows pushing back to the repository
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -33,19 +33,22 @@ jobs:
         pip install setuptools wheel twine bump2version
 
     - name: Bump version and commit changes
-      if: contains(github.event.head_commit.message, '[bump version]')
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         bump2version patch  # Or minor or major, depending on your strategy
-        git push --follow-tags
       env:
-        GITHUB_TOKEN: ${{ secrets.GENERAL_ACCESS_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GENERAL_ACCESS_TOKEN  }}
+
+    - name: Push changes
+      run: git push --follow-tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GENERAL_ACCESS_TOKEN  }}
 
     - name: Build and publish
-      run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        python setup.py sdist bdist_wheel
+        twine upload dist/*
