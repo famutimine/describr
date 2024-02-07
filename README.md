@@ -53,7 +53,7 @@ df = pd.DataFrame(data)
 
 **positive_class**: This is the response value for the primary outcome of interest. For instance, positive value for a Treatment cohort is 'Yes' or 1 otherwise 'No' or 0, respectively. Strings or integers are acceptable.
 
-**continuous_var_summary**: Users specifies measures of central tendency, only mean and median are acceptable. This parameter is case insensitive.
+**continuous_var_summary**: User specifies measures of central tendency, only mean and median are acceptable. This parameter is case insensitive.
 
 
 #### Example usage of FindOutliers Class
