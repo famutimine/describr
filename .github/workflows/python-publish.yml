@@ -33,22 +33,19 @@ jobs:
         pip install setuptools wheel twine bump2version
 
     - name: Bump version and commit changes
+      if: contains(github.event.head_commit.message, '[bump version]')
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
         bump2version patch  # Or minor or major, depending on your strategy
-      env:
-        GITHUB_TOKEN: ${{ secrets.GENERAL_ACCESS_TOKEN }}
-
-    - name: Push changes
-      run: git push --follow-tags
+        git push --follow-tags
       env:
         GITHUB_TOKEN: ${{ secrets.GENERAL_ACCESS_TOKEN }}
 
     - name: Build and publish
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
         python setup.py sdist bdist_wheel
         twine upload dist/*
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
