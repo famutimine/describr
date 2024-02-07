@@ -33,8 +33,8 @@ jobs:
 
     - name: Bump version and commit changes
       run: |
-        git config --global user.email "action@github.com"
-        git config --global user.name "GitHub Action"
+        git config --global user.email "danielfamutimi@gmail.com"
+        git config --global user.name "famutimine"
         bump2version patch  # Or minor or major, depending on your strategy
         git push --follow-tags  # Pushes the commit and tags back to the repository
 
